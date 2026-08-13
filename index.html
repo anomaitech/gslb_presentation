@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Groundwater Storage Trends in the Great Salt Lake Basin, 2002–2024</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="deck">
+
+<!-- ═══════════════ 1 · HERO ═══════════════ -->
+<section class="slide slide-hero" id="s-hero"
+  data-notes="[~40 s] Good afternoon. This talk presents a 22-year reconstruction of groundwater storage in the Great Salt Lake Basin, 2002 through 2024. The central idea is triangulation: we estimate the same quantity three independent ways — satellite gravimetry from the GRACE missions, the GLDAS land-surface model, and roughly 1,200 USGS monitoring wells — and ask whether the three can be reconciled. I will show that they can, but only after a leakage correction, which affects the results more than any other processing step. The work is joint with Jones, Williams, Sowby, and Serago.">
+  <canvas class="fullcanvas" id="heroCanvas"></canvas>
+  <div class="hero-content">
+    <p class="kicker" data-reveal style="--d:.2s">Research Seminar</p>
+    <h1 data-reveal style="--d:.55s">Groundwater Storage Trends<br>in the <em>Great Salt Lake Basin</em>, 2002–2024</h1>
+    <p class="hero-sub" data-reveal style="--d:1.0s">Reconciling satellite gravimetry, land-surface modeling,<br>and in-situ wells</p>
+    <div class="hero-authors" data-reveal style="--d:1.45s">
+      <p><strong>Henok Teklu</strong>¹ · Norman&nbsp;L.&nbsp;Jones¹* · Gustavious&nbsp;P.&nbsp;Williams¹ · Robert&nbsp;B.&nbsp;Sowby¹ · Jake&nbsp;Serago²</p>
+      <p class="affil">¹ Dept. of Civil &amp; Construction Engineering, Brigham Young University &nbsp;·&nbsp; ² Utah Division of Water Resources<br>* corresponding author</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 2 · THE BASIN ═══════════════ -->
+<section class="slide" id="s-basin"
+  data-notes="[~50 s] First, the setting. The Great Salt Lake Basin covers about 93,000 square kilometers across Utah, Idaho, Wyoming, and Nevada. It is a terminal, closed basin: the Bear, Weber, and Jordan rivers drain toward Great Salt Lake, and water leaves only by evaporation — which makes the basin a natural laboratory for storage accounting. As a spoken aside: over the study period river inflows to the lake declined substantially and the lake reached record-low levels, several meters below its long-term average. Municipal and agricultural pumping is concentrated along the Wasatch Front — Ogden, Salt Lake City, and Provo — where most of the basin's population lives.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">The setting</p>
+      <h2 data-reveal style="--d:.25s">A terminal basin<br>in sustained deficit</h2>
+      <div class="statstack solo">
+        <div class="stat" data-reveal style="--d:.6s">
+          <span class="stat-num"><span data-count="93000" data-dur="2.2" data-grp="1">0</span> <small>km²</small></span>
+          <span class="stat-cap">closed basin spanning Utah, Idaho, Wyoming, and Nevada; the Bear, Weber, and Jordan rivers drain toward Great Salt Lake, and evaporation is the only outflow</span>
+        </div>
+      </div>
+      <p class="footnote" data-reveal style="--d:1.05s">Groundwater pumping is concentrated along the Wasatch Front (Ogden, Salt Lake City, Provo)</p>
+    </div>
+    <div class="col-fig">
+      <div class="map-wrap" data-reveal style="--d:.4s">
+        <img class="basemap" src="assets/figure01.png" alt="GSLB study area">
+        <canvas class="map-overlay" id="basinRainCanvas"></canvas>
+      </div>
+      <p class="figcap" data-reveal style="--d:.9s">Great Salt Lake Basin study area: rivers, lakes, and major cities</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 2b · HYDROGEOLOGY ═══════════════ -->
+<section class="slide" id="s-hydro" data-anim="hydro"
+  data-notes="[~50 s] A brief word on the hydrogeology, because it shapes everything that follows. The productive aquifers are unconsolidated valley-fill deposits along the Wasatch Front, and nearly all groundwater development is concentrated there. To the south and west, fractured volcanic-rock aquifers underlie the basin's arid arm, and the western desert sees minimal development. Recharge is dominated by mountain-front processes: snowpack accumulates on the eastern ranges, melts, and infiltrates along the range fronts before moving basinward. Finally, the Bear, Weber, and Jordan rivers are in continuous exchange with shallow groundwater — gaining in some reaches, losing in others — which couples the surface-water and groundwater stories.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">The setting · hydrogeology</p>
+      <h2 data-reveal style="--d:.25s">Where the basin<br>stores its groundwater</h2>
+      <ul class="lead-list">
+        <li data-reveal style="--d:.7s"><strong>Valley-fill aquifers</strong> along the Wasatch Front host nearly all groundwater development</li>
+        <li data-reveal style="--d:2.9s"><strong>Fractured volcanic-rock aquifers</strong> underlie the south and west</li>
+        <li data-reveal style="--d:5.1s">Recharge is dominated by <strong>mountain-front snowmelt</strong> on the eastern ranges</li>
+        <li data-reveal style="--d:7.3s">The <strong>western desert</strong> is largely undeveloped</li>
+        <li data-reveal style="--d:9.5s">The <strong>Bear, Weber, and Jordan rivers</strong> exchange water with shallow groundwater</li>
+      </ul>
+    </div>
+    <div class="col-fig">
+      <div class="map-wrap" data-reveal style="--d:.4s">
+        <img class="basemap" src="assets/figure01.png" alt="GSLB hydrogeologic setting">
+        <canvas class="map-overlay" id="hydroGeoCanvas"></canvas>
+      </div>
+      <p class="figcap" data-reveal style="--d:.9s">Hydrogeologic setting, annotated on the study-area map</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 3 · THE QUESTION ═══════════════ -->
+<section class="slide" id="s-question"
+  data-notes="[~45 s] The lake's decline is directly observable — there is a gauge. Groundwater is not; it must be inferred. Hence the question of this paper: what has groundwater storage in this basin done over 22 years? We estimate it three independent ways. From orbit, the GRACE and GRACE-FO missions weigh the basin's total water mass. From a model, GLDAS-2.2 — the Catchment Land Surface Model run, which assimilates GRACE observations — simulates the terrestrial water balance cell by cell. From below, about 1,200 monitoring wells measure the water table directly. The three methods share no data and have entirely different error structures, so if they agree, the agreement is unlikely to be coincidental.">
+  <div class="center-col">
+    <p class="kicker" data-reveal style="--d:.1s">The question</p>
+    <h2 class="bigq" data-reveal style="--d:.3s">The lake's decline is directly observable.<br><em>What has groundwater storage done?</em></h2>
+    <div class="method-cards">
+      <div class="mcard" data-reveal style="--d:.8s">
+        <div class="mcard-icon icon-sat"><span class="sat-body"></span><span class="orbit-dot"></span></div>
+        <h3>Satellite gravimetry</h3>
+        <p>GRACE / GRACE-FO twin satellites measure the basin's total water mass</p>
+        <span class="mcard-tag">GRACE</span>
+      </div>
+      <div class="mcard" data-reveal style="--d:1.1s">
+        <div class="mcard-icon icon-model"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <h3>Land-surface modeling</h3>
+        <p>GLDAS-2.2 (Catchment LSM) simulates the terrestrial water balance for each grid cell and assimilates GRACE observations</p>
+        <span class="mcard-tag">GLDAS</span>
+      </div>
+      <div class="mcard" data-reveal style="--d:1.4s">
+        <div class="mcard-icon icon-well"><span class="well-pipe"></span><span class="well-water"></span></div>
+        <h3>In-situ observation</h3>
+        <p>≈1,200 USGS monitoring wells measure water levels directly in the aquifer</p>
+        <span class="mcard-tag">wells</span>
+      </div>
+    </div>
+    <p class="punch" data-reveal style="--d:1.9s">Three estimates with <strong>independent data and independent error structures</strong>.<br>Agreement among them is therefore meaningful.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 4 · GRACE 3D ═══════════════ -->
+<section class="slide slide-dark3d" id="s-grace3d" data-anim3d="grace"
+  data-notes="[~50 s] Method one, satellite gravimetry. GRACE is two satellites flying in formation about 220 kilometers apart, connected by a microwave ranging link. When the leading satellite approaches excess water mass, gravity accelerates it and the separation stretches; as it passes, the follower catches up. The link resolves those changes at the micron level, so mass change becomes a distance signal. Since 2018, GRACE Follow-On has continued the record on the same principle. The essential caveat is resolution: the effective footprint is roughly 300 by 300 kilometers — comparable to the basin itself — and that has consequences we address next.">
+  <div class="scene3d-holder">
+    <canvas id="graceCanvas"></canvas>
+    <div class="hud" id="graceHUD">
+      <div class="hud-label" id="hudSatA">GRACE-A</div>
+      <div class="hud-label" id="hudSatB">GRACE-B</div>
+      <div class="hud-label hud-mass" id="hudMass">water-mass anomaly</div>
+    </div>
+    <div class="webgl-fallback" id="graceFallback" hidden>
+      <h3>The GRACE measurement principle</h3>
+      <p>Twin satellites ~220&nbsp;km apart measure micron-level changes in their separation as gravity, and therefore water mass, varies beneath them. (The 3-D view is unavailable on this display.)</p>
+    </div>
+  </div>
+  <div class="scene3d-panel">
+    <p class="kicker" data-reveal style="--d:.1s">Method 1 · satellite gravimetry</p>
+    <h2 data-reveal style="--d:.25s">Measuring water mass<br>from orbit</h2>
+    <ul class="lead-list">
+      <li data-reveal style="--d:.6s">A change in water mass produces a gravity anomaly</li>
+      <li data-reveal style="--d:.85s">The anomaly accelerates the lead satellite and the <strong>separation changes</strong></li>
+      <li data-reveal style="--d:1.1s">The microwave link resolves that change at the <strong>micron</strong> level</li>
+      <li data-reveal style="--d:1.4s" class="warn">The effective footprint, however, is <strong>~300 × 300 km</strong>, comparable to the basin itself</li>
+    </ul>
+    <div class="range-readout" data-reveal style="--d:.7s">
+      <span class="rr-label">live ranging signal · Δ separation</span>
+      <span class="rr-value"><span id="rangeKm">+0.0</span> µm</span>
+      <span class="rr-delta" id="rangeDelta">nominal separation ≈ 220 km · stretch exaggerated in view</span>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 5 · LEAKAGE ═══════════════ -->
+<section class="slide" id="s-leakage" data-anim="leakage"
+  data-notes="[~55 s] That coarse footprint creates leakage. GRACE measures at roughly 300-kilometer scale, but the mascon product is delivered on a finer grid of roughly 100-kilometer cells. Watch the consequence, here drawn over the study-area map so the grid sits on the actual geography. The true signal is confined to the basin's cells. When each 300-kilometer measurement block is averaged and redistributed onto the finer grid, mass appears in cells outside the boundary and disappears from cells inside it, and the basin-mean amplitude falls to roughly half — the signal has leaked across the boundary. We restore it with a leakage factor of two, calibrated against the independent in-situ estimate rather than against a model.">
+  <div class="center-col wide">
+    <p class="kicker" data-reveal style="--d:.1s">The complication</p>
+    <h2 data-reveal style="--d:.25s">Signal leakage across the basin boundary</h2>
+    <div class="leak-stage" data-reveal style="--d:.5s">
+      <canvas id="leakCanvas"></canvas>
+      <div class="leak-captions">
+        <div class="leak-cap" id="leakCap0"><strong>1 · The true signal</strong><br>mass confined to the basin's cells on the ~100 km grid</div>
+        <div class="leak-cap" id="leakCap1"><strong>2 · Measured at ~300 km, delivered at ~100 km</strong><br>each coarse block is averaged and redistributed onto the fine grid, so mass spills across the boundary</div>
+        <div class="leak-cap" id="leakCap2"><strong>3 · The correction</strong><br>a leakage factor <em>L<sub>f</sub> = 2</em> restores the basin-mean amplitude</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 6 · PEELING THE COLUMN ═══════════════ -->
+<section class="slide" id="s-peel" data-anim="peel"
+  data-notes="[~40 s] GRACE weighs everything in the column, so isolating groundwater is an accounting exercise. From the total water storage anomaly we subtract, term by term: snow water equivalent, soil moisture, and canopy water, all taken from GLDAS; and surface water, from reservoir records and Great Salt Lake itself — in a terminal basin the lake term is substantial. What remains is the groundwater storage anomaly, the quantity the rest of the talk examines.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">From total storage to groundwater</p>
+      <h2 data-reveal style="--d:.25s">Decomposing the water column</h2>
+      <p class="eqline" data-reveal style="--d:.55s">GWSa&nbsp;=&nbsp;TWSa&nbsp;−&nbsp;snow&nbsp;−&nbsp;soil&nbsp;−&nbsp;canopy&nbsp;−&nbsp;surface&nbsp;water</p>
+    </div>
+    <div class="col-fig peel-stage">
+      <div class="peel-stack" id="peelStack">
+        <div class="peel-layer pl-tws"><span>TWSa — total water storage anomaly <em>(what GRACE weighs)</em></span></div>
+        <div class="peel-layer pl-snow"><span>snow water equivalent</span></div>
+        <div class="peel-layer pl-soil"><span>soil moisture</span></div>
+        <div class="peel-layer pl-canopy"><span>canopy water</span></div>
+        <div class="peel-layer pl-sw"><span>surface water · reservoirs and Great Salt Lake</span></div>
+        <div class="peel-layer pl-gw"><span>groundwater&nbsp;·&nbsp;GWSa</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 6c · GLDAS-2.2 ═══════════════ -->
+<section class="slide" id="s-gldas"
+  data-notes="[~45 s] The second method is a land-surface model. GLDAS-2.2 runs the Catchment Land Surface Model over a global grid: each cell carries a full water balance — precipitation in, evapotranspiration out, and storage partitioned into snow, soil moisture, canopy water, and an explicit groundwater store. What distinguishes the 2.2 run is data assimilation: GRACE total-water-storage observations are assimilated into the model, so the simulated storage is continuously constrained by the same gravimetric signal introduced earlier, but delivered at much finer resolution — daily values on a quarter-degree grid, available from February 2003 onward, which we aggregate to monthly. Importantly, no in-situ water-level data enter the model, so it remains independent of the well-based estimate it will later be compared against.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">Method 2 · land-surface modeling</p>
+      <h2 data-reveal style="--d:.25s">Simulating the water balance:<br>GLDAS-2.2</h2>
+      <ul class="lead-list">
+        <li data-reveal style="--d:.6s">The <strong>Catchment Land Surface Model</strong> simulates snow, soil moisture, canopy water, and groundwater for each grid cell</li>
+        <li data-reveal style="--d:.9s">The 2.2 run <strong>assimilates GRACE</strong> total-water-storage observations, constraining the simulated storage</li>
+        <li data-reveal style="--d:1.2s">Provides an <strong>explicit groundwater storage variable</strong> at <strong>0.25°, daily</strong> — far finer than the GRACE footprint</li>
+        <li data-reveal style="--d:1.5s">Available from <strong>February 2003</strong> onward; daily values aggregated to monthly for this analysis</li>
+        <li data-reveal style="--d:1.8s">Independent of the wells: <strong>no in-situ water levels</strong> enter the model</li>
+      </ul>
+    </div>
+    <div class="col-fig">
+      <div class="gldas-stage" data-reveal style="--d:.4s">
+        <canvas id="gldasCanvas"></canvas>
+      </div>
+      <p class="figcap" data-reveal style="--d:.9s">Modeled water-balance cells over the basin; GRACE observations assimilated into the simulated storage</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 7 · WELLS / GWDM ═══════════════ -->
+<section class="slide" id="s-wells" data-anim="wells"
+  data-notes="[~50 s] Method three is the in-situ estimate: approximately 1,200 USGS monitoring wells processed through the Groundwater Data Mapper, GWDM. The immediate obstacle is that well records are irregular and gappy. Short gaps are filled with PCHIP interpolation; longer gaps with an Extreme Learning Machine trained on climate covariates — the healing hydrograph illustrates the reconstruction. With continuous records in hand, ordinary kriging maps water levels across the basin for each year, and successive rasters are differenced and multiplied by a specific yield of 0.15 to convert water-level change into storage change. The result is a well-based storage series fully independent of both the satellite and the model.">
+  <div class="two-col">
+    <div class="col-fig">
+      <div class="wells-map" data-reveal style="--d:.3s">
+        <canvas id="wellsMapCanvas"></canvas>
+        <div class="wells-counter"><span id="wellCount">0</span> wells</div>
+      </div>
+    </div>
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">Method 3 · in-situ · GWDM</p>
+      <h2 data-reveal style="--d:.25s">≈1,200 wells,<br>imputed and mapped</h2>
+      <div class="hydro-wrap" data-reveal style="--d:.5s">
+        <canvas id="hydroCanvas"></canvas>
+        <div class="hydro-tag" id="hydroTag">raw record with a data gap</div>
+      </div>
+      <ol class="pipeline" >
+        <li data-reveal style="--d:.9s"><strong>Impute</strong> gaps · PCHIP + Extreme Learning Machine</li>
+        <li data-reveal style="--d:1.15s"><strong>Interpolate</strong> · ordinary kriging → annual water-level rasters</li>
+        <li data-reveal style="--d:1.4s"><strong>Difference</strong> volumes × specific yield <em>S<sub>y</sub> = 0.15</em> → storage change</li>
+      </ol>
+      <img class="inset-fig" src="assets/figure02.png" alt="GWDM workflow" data-reveal style="--d:1.7s">
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 7b · GWDM WORKFLOW DETAIL ═══════════════ -->
+<section class="slide" id="s-gwdm" data-anim="gwdm"
+  data-notes="[~50 s] The workflow in more detail, following the paper's Figure 2. Panel (a): the records are screened, and multi-year gaps are pervasive — a gap of a decade, as shown here, is not unusual. Panel (b): the gaps are imputed — PCHIP for short interruptions, the Extreme Learning Machine for long ones — yielding a continuous series at every well. Panel (c): the imputed series are sampled on a common annual schedule and kriged into basin-wide water-level rasters. Panel (d): consecutive rasters are differenced, and the intervening volume, multiplied by specific yield, gives the annual change in stored groundwater. Every downstream comparison in this talk rests on this pipeline, which is why its assumptions reappear in the limitations.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">Method 3 · workflow detail</p>
+      <h2 data-reveal style="--d:.25s">From well records<br>to storage change</h2>
+      <ol class="gwdm-steps">
+        <li id="gwdmStep0" data-reveal style="--d:.5s"><strong>Screen the records</strong> · ≈1,200 USGS wells; multi-year gaps are pervasive</li>
+        <li id="gwdmStep1" data-reveal style="--d:.65s"><strong>Impute the gaps</strong> · PCHIP for short gaps; an Extreme Learning Machine on climate covariates for long ones</li>
+        <li id="gwdmStep2" data-reveal style="--d:.8s"><strong>Interpolate</strong> · ordinary kriging produces an annual water-level raster for the basin</li>
+        <li id="gwdmStep3" data-reveal style="--d:.95s"><strong>Difference</strong> · ΔGW storage = S<sub>y</sub> × Δvolume between consecutive rasters, with S<sub>y</sub> = 0.15</li>
+      </ol>
+      <p class="footnote" data-reveal style="--d:1.3s">The pipeline is applied identically in every year, so its assumptions enter all years of the in-situ series alike.</p>
+    </div>
+    <div class="col-fig">
+      <div class="gwdm-fig" data-reveal style="--d:.35s">
+        <img src="assets/figure02.png" alt="GWDM workflow: gap identification, imputation, kriging, differencing">
+        <canvas class="map-overlay" id="gwdmCanvas"></canvas>
+      </div>
+      <p class="figcap" data-reveal style="--d:.8s">GWDM pipeline: (a) gapped record → (b) imputation → (c) kriged annual rasters → (d) volumetric differencing</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════ 8 · FIVE ESTIMATES ═══════════════ -->
+<section class="slide" id="s-five"
+  data-notes="[~50 s] The five estimates overlaid on one axis. As each curve joins the common frame, watch the shared structure: modest gains through the mid-2000s, the 2011 wet-year peak, then two sustained drawdowns. Note how the leakage correction restores the GRACE amplitude: the corrected satellite, the model, and the wells trace the same history; the uncorrected satellite does not. The GRACE-Lf, GLDAS-2.2 and GWDM curves are traced from the paper's figures; GRACE-sw equals GRACE-Lf divided by the leakage factor.">
+  <div class="center-col wide">
+    <p class="kicker" data-reveal style="--d:.1s">The comparison set</p>
+    <h2 data-reveal style="--d:.25s">Five estimates of one quantity</h2>
+    <div class="five-stage" data-reveal style="--d:.5s">
+      <canvas id="fiveCanvas"></canvas>
+    </div>
+    <div class="five-legend" id="fiveLegend" data-reveal style="--d:.7s">
+      <span class="fchip" style="--c:#5aa9e6">GRACE-raw</span>
+      <span class="fchip" style="--c:#7fd1c8">GRACE-sw</span>
+      <span class="fchip" style="--c:#ffb454">GRACE-L<sub>f</sub></span>
+      <span class="fchip" style="--c:#e6704b">GLDAS-2.2</span>
+      <span class="fchip" style="--c:#e8e3d6">GWDM</span>
+    </div>
+    <p class="figcap center" data-reveal style="--d:.9s">Annual GWSa by method, 2002–2023 · GRACE-L<sub>f</sub>, GLDAS-2.2 and GWDM traced from the paper's figures · GRACE-sw = GRACE-L<sub>f</sub> ÷ L<sub>f</sub></p>
+  </div>
+</section>
+
+<!-- ═══════════════ 9 · TIME REPLAY ═══════════════ -->
+<section class="slide" id="s-replay" data-anim="replay"
+  data-notes="[~45 s] The record replayed as a single trace, using the GRACE-raw annual series. Through the 2000s the basin roughly holds its own — wet years such as 2005 and 2011 produce visible recoveries. Then two long drawdowns: 2012 through 2016, and 2019 through 2022, the latter bottoming at minus 8.7 centimeters in 2022, the record minimum. The recoveries follow wet winters with a delay; we quantify that lag shortly. By 2024 the basin had recovered only partially.">
+  <div class="replay-head">
+    <div>
+      <p class="kicker" data-reveal style="--d:.1s">Results · the record</p>
+      <h2 data-reveal style="--d:.25s">The 2002–2024 record, replayed</h2>
+    </div>
+    <div class="year-counter" data-reveal style="--d:.4s"><span id="replayYear">2002</span></div>
+  </div>
+  <div class="replay-stage" data-reveal style="--d:.5s">
+    <canvas id="replayCanvas"></canvas>
+  </div>
+  <p class="figcap center" data-reveal style="--d:.7s">GRACE-raw annual GWSa (cm) · shaded: drawdown intervals 2012–2016 &amp; 2019–2022</p>
+</section>
+
+<!-- ═══════════════ 10 · LEAKAGE PAYOFF ═══════════════ -->
+<section class="slide" id="s-payoff" data-anim="payoff"
+  data-notes="[~45 s] Does the leakage correction actually matter? Quantitatively, it is decisive. Correlate raw GRACE against the in-situ series and the result is r equal to 0.17 — essentially noise; one would conclude the satellite cannot see this basin's groundwater. Apply the leakage factor of two and the correlation rises to 0.77. On the right, the corrected satellite series plotted over the well-based GWDM series: the two share the drawdowns, the recoveries, and the turning points. The satellite does capture the basin's groundwater signal; before correction, much of that signal had leaked outside the basin boundary.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">Results · satellite vs. wells</p>
+      <h2 data-reveal style="--d:.25s">The effect of the<br>leakage correction</h2>
+      <div class="gauge-wrap" data-reveal style="--d:.5s">
+        <canvas id="gaugeCanvas"></canvas>
+        <div class="gauge-center">
+          <span class="gauge-r">r&nbsp;=&nbsp;<span id="gaugeVal">0.17</span></span>
+          <span class="gauge-cap" id="gaugeCap">GRACE-raw ↔ in-situ</span>
+        </div>
+      </div>
+      <p class="punch small" data-reveal style="--d:.9s">GRACE↔wells correlation: <strong>0.17 → 0.77</strong> after L<sub>f</sub> correction</p>
+    </div>
+    <div class="col-fig">
+      <figure class="wipe-fig" data-reveal style="--d:.6s">
+        <img src="assets/figure07.png" alt="GRACE-Lf vs GWDM time series">
+        <figcaption>GRACE-L<sub>f</sub> (blue) vs. in-situ GWDM (black), 2002–2024</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 11 · CONVERGENCE ═══════════════ -->
+<section class="slide" id="s-converge"
+  data-notes="[~50 s] The model tells the same story. A word on the dataset first: GLDAS-2.2 is the Catchment Land Surface Model run that assimilates GRACE observations, and it provides an explicit groundwater storage variable at higher spatial resolution than GRACE itself. GLDAS-2.2 against the wells correlates at 0.81 over the full record, with an R-squared of 0.66 — and 0.91 during 2003 to 2012, the decade when the well network was most densely sampled. That last number is worth pausing on: when the in-situ record is at its best, model and wells are nearly interchangeable. The divergence that appears after 2012 is itself informative, because it coincides with the multi-year gaps in the well records that we quantify in the limitations. Three independent methods, one consistent history: drawdown 2012–2016, partial recovery, drawdown 2019–2022.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">Results · model vs. wells</p>
+      <h2 data-reveal style="--d:.25s">Independent estimates<br>converge</h2>
+      <div class="statstack">
+        <div class="stat" data-reveal style="--d:.55s">
+          <span class="stat-num">r&nbsp;=&nbsp;<span data-count="0.81" data-decimals="2" data-dur="2">0</span></span>
+          <span class="stat-cap">GLDAS-2.2 ↔ in-situ wells, 2002–2024</span>
+        </div>
+        <div class="stat" data-reveal style="--d:.9s">
+          <span class="stat-num">R²&nbsp;=&nbsp;<span data-count="0.66" data-decimals="2" data-dur="2">0</span></span>
+          <span class="stat-cap">full record; <strong>0.91</strong> during the densely sampled 2003–2012 decade</span>
+        </div>
+      </div>
+      <p class="footnote" data-reveal style="--d:1.2s">GLDAS-2.2 is the Catchment Land Surface Model run that assimilates GRACE observations and provides an explicit groundwater storage variable at higher spatial resolution than GRACE itself.</p>
+      <p class="punch small" data-reveal style="--d:1.5s">Satellite, model, and wells describe <strong>a consistent history</strong>:<br>drawdown 2012–2016, partial recovery, drawdown 2019–2022.</p>
+    </div>
+    <div class="col-fig">
+      <figure class="wipe-fig" data-reveal style="--d:.5s">
+        <img src="assets/figure10.png" alt="GLDAS, GRACE-Lf, GWDM and lagged precipitation">
+        <figcaption>GRACE-L<sub>f</sub> · GLDAS-2.2 · GWDM · lagged precipitation</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 12 · DROUGHT LOSS ═══════════════ -->
+<section class="slide" id="s-loss" data-anim="loss"
+  data-notes="[~45 s] Putting a volume on the worst of it: over the 2011-to-2016 drought interval the corrected GRACE series implies a groundwater loss of approximately 10.1 cubic kilometers. We can check that against a fully independent technique. Young and coauthors (2021) inverted GPS observations of crustal loading — the solid earth flexing as the water load is removed — and obtained 10.9 plus or minus 2.8 cubic kilometers for the same interval. Satellite gravimetry and GPS-observed crustal deformation share no instruments, no data, and no processing assumptions, yet they agree on the magnitude of the loss.">
+  <div class="center-col wide">
+    <p class="kicker" data-reveal style="--d:.1s">Results · drought-interval loss</p>
+    <h2 data-reveal style="--d:.25s">Quantifying the 2011–2016 loss</h2>
+    <div class="loss-stage" data-reveal style="--d:.5s">
+      <div class="loss-col">
+        <div class="tank"><div class="tank-water" id="tankWater"></div><div class="tank-grid"></div></div>
+        <p class="loss-big">−<span id="lossVal">0.0</span> <small>km³</small></p>
+        <p class="loss-cap"><strong>This study</strong> · groundwater lost 2011–2016<br>(GRACE-L<sub>f</sub>)</p>
+      </div>
+      <div class="loss-vs">≈</div>
+      <div class="loss-col">
+        <div class="whisker-wrap"><canvas id="whiskerCanvas"></canvas></div>
+        <p class="loss-big">−10.9 <small>± 2.8 km³</small></p>
+        <p class="loss-cap"><strong>Independent check</strong> · GPS crustal-loading inversion<br>(Young et al., 2021)</p>
+      </div>
+    </div>
+    <p class="punch" data-reveal style="--d:1.2s">Two physically unrelated measurements, satellite gravimetry and<br>GPS-observed crustal loading, agree on the magnitude of the loss.</p>
+  </div>
+</section>
+
+
+<!-- ═══════════════ 13 · PRECIP LAG ═══════════════ -->
+<section class="slide" id="s-lag" data-anim="lag"
+  data-notes="[~50 s] How quickly does the aquifer respond to climate? We correlated each groundwater series against precipitation at increasing lags. The satellite series peaks at a one-year lag, r of 0.42, and the GLDAS model does the same at 0.72. The wells, the direct measurement of the aquifer, spread the response across one and two years — 0.59 and 0.60, a statistical tie — and the three-year moving average of rainfall correlates strongest of all at 0.67. So the aquifer's memory is one to two years: recharge travels slowly through the thick unsaturated zones of the valley-fill aquifers, integrating several years of climate. Beyond two years the correlations collapse everywhere.">
+  <div class="two-col">
+    <div class="col-text">
+      <p class="kicker" data-reveal style="--d:.1s">Results · climate response</p>
+      <h2 data-reveal style="--d:.25s">Groundwater lags precipitation by&nbsp;one&nbsp;to&nbsp;two&nbsp;years</h2>
+      <div class="lag-chart" data-reveal style="--d:.5s">
+        <canvas id="lagCanvas"></canvas>
+      </div>
+      <p class="punch small" data-reveal style="--d:1.6s">The wells put the lag at <strong>one to two years</strong> (r&nbsp;=&nbsp;0.59 and 0.60 — a statistical tie) and correlate most strongly with the <strong>three-year rainfall average</strong> (r&nbsp;=&nbsp;0.67) — recharge integrates multi-year climate.</p>
+    </div>
+    <div class="col-fig">
+      <figure class="wipe-fig" data-reveal style="--d:.5s">
+        <img src="assets/figure11.png" alt="Lagged precipitation vs GWDM">
+        <figcaption>GWDM GWSa vs. lagged &amp; multi-year-average precipitation</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ 13b · MANAGEMENT IMPLICATIONS ═══════════════ -->
+<section class="slide" id="s-implic" data-anim="implic"
+  data-notes="[~50 s] What does that lag mean for management? It is, in effect, one to two years of lead time. Annual precipitation largely sets the groundwater storage of the following one to two years: the satellite series correlates most strongly at a one-year lag, and the wells split the response across one- and two-year lags, 0.59 and 0.60. A dry year is therefore a quantitative early warning of reduced recharge over the next year or two, before any decline appears in the wells — so pumping and allocation decisions can be adjusted in advance. The caution is the deficit itself: recovery between droughts has been partial — the 2011-to-2016 interval alone removed about 10.1 cubic kilometers — so successive droughts begin from progressively lower storage.">
+  <div class="center-col wide">
+    <p class="kicker" data-reveal style="--d:.1s">Implications for management</p>
+    <h2 data-reveal style="--d:.25s">One to two years of lead time for drought planning</h2>
+    <div class="implic-stage" data-reveal style="--d:.5s">
+      <canvas id="implicCanvas"></canvas>
+    </div>
+    <div class="limits-grid implic-grid">
+      <div class="limit-card" data-reveal style="--d:.9s">
+        <h3>Precipitation as a leading indicator</h3>
+        <p>Correlations peak at <strong>one- to two-year lags</strong>: the wells at r = 0.59 and 0.60 (one and two years); the satellite at one year (r = 0.42).</p>
+      </div>
+      <div class="limit-card" data-reveal style="--d:1.15s">
+        <h3>Anticipatory drought response</h3>
+        <p>A dry year signals <strong>reduced recharge over the next one to two years</strong>, before declines register in wells — pumping and allocation can be adjusted in advance.</p>
+      </div>
+      <div class="limit-card" data-reveal style="--d:1.4s">
+        <h3>A sustained deficit</h3>
+        <p>Inter-drought recovery has been partial: 2011–2016 alone removed <strong>≈10.1 km³</strong>, and the anomaly reached −8.7 cm in 2022.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════ 14 · LIMITS ═══════════════ -->
+<section class="slide" id="s-limits" data-anim="limits"
+  data-notes="[~50 s] Three limitations deserve attention. First, imputation: the Extreme Learning Machine performs well on gaps up to about three years, but beyond that nothing constrains the trajectory inside the gap, and its predictions drift toward the climatological mean, damping exactly the drought signals we care about. Second, prevalence: roughly half of the wells with usable records contain gaps longer than three years, and a majority of the gap-years fall within the drought intervals of greatest interest. Third, structure: a single basin-wide specific yield of 0.15 and GRACE's 300-kilometer footprint mean the absolute volumes carry real uncertainty even where the timing agrees. The first two limitations point directly at future work: repeating this analysis with an imputation method designed for multi-year gaps in well records.">
+  <div class="center-col wide">
+    <p class="kicker" data-reveal style="--d:.1s">Limitations</p>
+    <h2 data-reveal style="--d:.25s">Sources of uncertainty</h2>
+    <div class="limits-grid">
+      <div class="limit-card" data-reveal style="--d:.5s">
+        <div class="decay-wrap"><canvas id="decayCanvas"></canvas></div>
+        <h3>Imputation degrades with gap length</h3>
+        <p>ELM accuracy declines beyond <strong>~3-year gaps</strong>; predictions drift toward the climatological mean as gaps lengthen.</p>
+      </div>
+      <div class="limit-card" data-reveal style="--d:.8s">
+        <p class="limit-big"><span data-count="48" data-dur="2">0</span><small>%</small></p>
+        <h3>Long gaps are prevalent</h3>
+        <p>Roughly half of wells with usable records contain gaps exceeding three years, and a majority of the gap-years fall in the <strong>drought years</strong> of greatest interest.</p>
+      </div>
+      <div class="limit-card" data-reveal style="--d:1.1s">
+        <p class="limit-big">S<sub>y</sub>&nbsp;·&nbsp;300<small>km</small></p>
+        <h3>Structural uncertainty</h3>
+        <p>A single specific yield (0.15) and GRACE's coarse footprint leave absolute volumes uncertain even where the timing agrees.</p>
+      </div>
+    </div>
+    <p class="punch" data-reveal style="--d:1.5s">Future work: repeating this analysis with <strong>an imputation method designed for multi-year gaps</strong> in well records.</p>
+  </div>
+</section>
+
+<!-- ═══════════════ 15 · TAKEAWAYS ═══════════════ -->
+<section class="slide slide-hero" id="s-end"
+  data-notes="[~45 s] To close. First, at the scale of a single basin, leakage correction is a prerequisite — it moves the satellite-to-well correlation from 0.17 to 0.77. Second, once corrected, satellite, model, and wells converge on one storage history, including a 2011-to-2016 loss of about 10.1 cubic kilometers that an independent GPS inversion corroborates. Third, the aquifer responds to precipitation with a one-to-two-year lag, which gives managers usable lead time. Fourth, the limiting factor is now the well record itself — an improved imputation method for multi-year gaps is a priority for future work. Fifth, a practical consequence: once the leakage factor is calibrated — Lf equals 2 for this basin — the GRACE-derived series scaled by that factor can serve as a reliable ongoing storage estimate without continuous dependence on the in-situ network, with the caveat that periodic re-validation against wells remains advisable. Thank you; I welcome your questions.">
+  <canvas class="fullcanvas" id="endCanvas"></canvas>
+  <div class="hero-content end-content">
+    <p class="kicker" data-reveal style="--d:.15s">Takeaways</p>
+    <div class="take-list">
+      <p class="take" data-reveal style="--d:.45s"><span class="tnum">1</span><span class="take-text">In a ~93,000 km² basin, <strong>leakage correction is decisive</strong>: r = 0.17 → 0.77</span></p>
+      <p class="take" data-reveal style="--d:.85s"><span class="tnum">2</span><span class="take-text">Corrected satellite, model, and wells <strong>converge</strong>; drought loss ≈ 10.1 km³, corroborated by GPS (10.9 ± 2.8)</span></p>
+      <p class="take" data-reveal style="--d:1.25s"><span class="tnum">3</span><span class="take-text">Groundwater follows precipitation with a lag of <strong>one to two years</strong></span></p>
+      <p class="take" data-reveal style="--d:1.65s"><span class="tnum">4</span><span class="take-text">The limiting factor is the <strong>well record itself</strong>; an imputation method for multi-year gaps is a priority for future work</span></p>
+      <p class="take" data-reveal style="--d:2.05s"><span class="tnum">5</span><span class="take-text">With L<sub>f</sub> calibrated, <strong>scaled GRACE can serve as an ongoing storage estimate</strong> — subject to periodic re-validation against wells</span></p>
+    </div>
+    <p class="hero-sub thanks" data-reveal style="--d:2.5s">Thank you</p>
+    <p class="affil" data-reveal style="--d:2.7s">Teklu · Jones* · Williams · Sowby (BYU Civil &amp; Construction Eng.) · Serago (Utah DWRe)</p>
+  </div>
+</section>
+
+</div>
+
+<!-- chrome -->
+<div id="progress"><div id="progressFill"></div></div>
+<div id="pageNum">1 / 21</div>
+<div id="notesPanel"><strong>Notes</strong><p id="notesText"></p></div>
+<div id="hint">← → navigate · N notes · F fullscreen</div>
+
+<script src="mapdata.js"></script>
+<script src="three.min.js"></script>
+<script src="sat3d.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
