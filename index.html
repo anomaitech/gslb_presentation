@@ -156,12 +156,13 @@
 
 <!-- ═══════════════ 6 · PEELING THE COLUMN ═══════════════ -->
 <section class="slide" id="s-peel" data-anim="peel"
-  data-notes="[~40 s] GRACE weighs everything in the column, so isolating groundwater is an accounting exercise. From the total water storage anomaly we subtract, term by term: snow water equivalent, soil moisture, and canopy water, all taken from GLDAS; and surface water, from reservoir records and Great Salt Lake itself — in a terminal basin the lake term is substantial. What remains is the groundwater storage anomaly, the quantity the rest of the talk examines.">
+  data-notes="[~40 s] GRACE weighs everything in the column, so isolating groundwater is an accounting exercise. From the total water storage anomaly we subtract, term by term: snow water equivalent, soil moisture, and canopy water, all taken from GLDAS; and surface water, from reservoir records and Great Salt Lake itself — in a terminal basin the lake term is substantial. What remains is the groundwater storage anomaly, the quantity the rest of the talk examines. A word on the term anomaly: none of these series is an absolute volume. Each is a departure from its own 2004-to-2009 average — the standard GRACE reference period — so zero means equal to that baseline, positive means wetter than the mid-2000s, and negative means drier. Every series in this talk — satellite, model, and wells — uses this same reference, which is what makes them directly comparable.">
   <div class="two-col">
     <div class="col-text">
       <p class="kicker" data-reveal style="--d:.1s">From total storage to groundwater</p>
       <h2 data-reveal style="--d:.25s">Decomposing the water column</h2>
       <p class="eqline" data-reveal style="--d:.55s">GWSa&nbsp;=&nbsp;TWSa&nbsp;−&nbsp;snow&nbsp;−&nbsp;soil&nbsp;−&nbsp;canopy&nbsp;−&nbsp;surface&nbsp;water</p>
+      <p class="footnote" data-reveal style="--d:.9s"><strong>Anomaly</strong> = departure from a reference: every series is expressed relative to its own <strong>2004–2009 average</strong> (the GRACE convention). Zero marks that baseline — positive is wetter than the 2004–2009 mean, negative is drier.</p>
     </div>
     <div class="col-fig peel-stage">
       <div class="peel-stack" id="peelStack">
@@ -238,7 +239,7 @@
         <li id="gwdmStep0" data-reveal style="--d:.5s"><strong>Screen the records</strong> · ≈1,200 USGS wells; multi-year gaps are pervasive</li>
         <li id="gwdmStep1" data-reveal style="--d:.65s"><strong>Impute the gaps</strong> · PCHIP for short gaps; an Extreme Learning Machine on climate covariates for long ones</li>
         <li id="gwdmStep2" data-reveal style="--d:.8s"><strong>Interpolate</strong> · ordinary kriging produces an annual water-level raster for the basin</li>
-        <li id="gwdmStep3" data-reveal style="--d:.95s"><strong>Difference</strong> · ΔGW storage = S<sub>y</sub> × Δvolume between consecutive rasters, with S<sub>y</sub> = 0.15</li>
+        <li id="gwdmStep3" data-reveal style="--d:.95s"><strong>Difference</strong> · ΔGW storage = S<sub>y</sub> × Δvolume between consecutive rasters, with S<sub>y</sub> = 0.15 · anomalies referenced to the <strong>2004–2009 mean</strong>, the GRACE baseline</li>
       </ol>
       <p class="footnote" data-reveal style="--d:1.3s">The pipeline is applied identically in every year, so its assumptions enter all years of the in-situ series alike.</p>
     </div>
