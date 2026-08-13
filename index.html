@@ -201,6 +201,19 @@
   </div>
 </section>
 
+<!-- ═══════════════ 6d · THE PATH TO A WELL ═══════════════ -->
+<section class="slide" id="s-journey" data-anim="journey"
+  data-notes="[~55 s] Before the in-situ method, the physical path the water takes. Precipitation arrives as snow in the mountains and rain in the valley — in this basin, mountain snowpack dominates recharge. Not all of it reaches the aquifer: part is intercepted by the canopy and evaporates, part returns to the atmosphere by evapotranspiration, and part runs off at the surface. The remainder infiltrates: snowmelt enters along the mountain front, valley rain enters through the soil, and both percolate through the unsaturated zone over months to years. When that water reaches the saturated zone, the water table rises — and that rise is precisely what a monitoring well records. Every quantity in the in-situ estimate begins as a water-level measurement at a well, which is why the well network is the direct observation of this entire pathway, and why groundwater lags the precipitation that drives it.">
+  <div class="center-col wide">
+    <p class="kicker" data-reveal style="--d:.1s">Method 3 · in-situ · the pathway</p>
+    <h2 data-reveal style="--d:.25s">From precipitation to the well</h2>
+    <div class="journey-stage" data-reveal style="--d:.5s">
+      <canvas id="journeyCanvas"></canvas>
+    </div>
+    <p class="figcap center" data-reveal style="--d:.85s">Snow and rain partition into interception, evapotranspiration, and runoff; the remainder infiltrates, percolates through the unsaturated zone, and raises the water table — the signal a monitoring well records</p>
+  </div>
+</section>
+
 <!-- ═══════════════ 7 · WELLS / GWDM ═══════════════ -->
 <section class="slide" id="s-wells" data-anim="wells"
   data-notes="[~50 s] Method three is the in-situ estimate: approximately 1,200 USGS monitoring wells processed through the Groundwater Data Mapper, GWDM. The immediate obstacle is that well records are irregular and gappy. Short gaps are filled with PCHIP interpolation; longer gaps with an Extreme Learning Machine trained on climate covariates — the healing hydrograph illustrates the reconstruction. With continuous records in hand, ordinary kriging maps water levels across the basin for each year, and successive rasters are differenced and multiplied by a specific yield of 0.15 to convert water-level change into storage change. The series is referenced to its 2004-to-2009 temporal mean, consistent with the GRACE baseline period, permitting direct intercomparison of the in-situ, gravimetric, and modeled estimates. Beyond that shared reference period, the result is fully independent of both the satellite and the model.">

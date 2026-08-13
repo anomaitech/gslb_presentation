@@ -1529,9 +1529,298 @@
     });
   })();
 
-  // ---- 13b · management implications: one-year lead-time schematic ----
+  // ---- 6d · the path to a well: snow, rain, losses, percolation, water table ----
   (function () {
     let elapsed = 0;
+    const CYC = 18;
+    function rnd(i) { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+    reg("s-journey", {
+      enter: function () { elapsed = 0; },
+      tick: function (dt) {
+        elapsed += dt;
+        const f = fitCanvas(document.getElementById("journeyCanvas"));
+        if (!f) return;
+        const ctx = f.ctx, W = f.w, H = f.h;
+        ctx.clearRect(0, 0, W, H);
+        const T = elapsed % CYC;
+        const fade = T > CYC - 0.8 ? smooth01((CYC - T) / 0.8) : 1;
+        const SANS = "'Avenir Next', sans-serif";
+
+        // ── terrain profile: mountain (left) sloping to valley floor ──
+        const valleyY = H * 0.56, peakX = W * 0.16, peakY = H * 0.14, footX = W * 0.36;
+        function surfY(x) {
+          if (x <= peakX) return peakY + (valleyY - peakY) * Math.pow((peakX - x) / peakX, 1.6);
+          if (x <= footX) return peakY + (valleyY - peakY) * Math.pow((x - peakX) / (footX - peakX), 1.25);
+          return valleyY;
+        }
+        const wtBase = H * 0.80;
+
+        // subsurface fill (unsaturated zone) + stipple
+        ctx.beginPath();
+        ctx.moveTo(0, H); ctx.lineTo(0, surfY(0));
+        for (let x = 0; x <= W; x += 6) ctx.lineTo(x, surfY(x));
+        ctx.lineTo(W, H); ctx.closePath();
+        ctx.fillStyle = "rgba(170,150,120,.07)";
+        ctx.fill();
+        for (let k = 0; k < 220; k++) {
+          const sx = W * rnd(k);
+          const syr = rnd(k + 500);
+          const sy = surfY(sx) + 10 + (H - 14 - surfY(sx)) * syr;
+          if (sy < H - 6) {
+            ctx.fillStyle = "rgba(190,175,150," + (0.06 + 0.08 * rnd(k + 900)).toFixed(3) + ")";
+            ctx.beginPath(); ctx.arc(sx, sy, 1 + 1.3 * rnd(k + 1300), 0, Math.PI * 2); ctx.fill();
+          }
+        }
+        // terrain line
+        ctx.strokeStyle = "rgba(147,164,188,.55)";
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        for (let x = 0; x <= W; x += 6) x ? ctx.lineTo(x, surfY(x)) : ctx.moveTo(0, surfY(0));
+        ctx.stroke();
+
+        // ── mound + water table (rises late in the cycle) ──
+        const pWT = smooth01((T - 11.2) / 1.8) * fade;
+        const mSig = W * 0.16;
+        function wtSurf(x) {
+          const d1 = x - W * 0.33, d2 = x - W * 0.52;
+          return wtBase
+            - H * 0.055 * pWT * Math.exp(-(d1 * d1) / (2 * mSig * mSig))
+            - H * 0.030 * pWT * Math.exp(-(d2 * d2) / (2 * mSig * mSig));
+        }
+        ctx.beginPath();
+        ctx.moveTo(0, H); ctx.lineTo(0, wtSurf(0));
+        for (let x = 0; x <= W; x += 6) ctx.lineTo(x, wtSurf(x));
+        ctx.lineTo(W, H); ctx.closePath();
+        const bz = ctx.createLinearGradient(0, wtBase - H * 0.06, 0, H);
+        bz.addColorStop(0, "rgba(90,169,230,.22)");
+        bz.addColorStop(1, "rgba(90,169,230,.06)");
+        ctx.fillStyle = bz;
+        ctx.fill();
+        ctx.strokeStyle = "rgba(90,169,230,.8)";
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        for (let x = 0; x <= W; x += 6) x ? ctx.lineTo(x, wtSurf(x)) : ctx.moveTo(0, wtSurf(0));
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font = "15px " + SANS;
+        ctx.fillStyle = "rgba(147,164,188,.75)";
+        ctx.textAlign = "left";
+        ctx.fillText("water table", 14, wtBase + 22);
+        ctx.fillText("unsaturated zone", 14, (valleyY + wtBase) / 2 + 30);
+
+        // ── monitoring well at right ──
+        const wx = W * 0.74, wTop = valleyY, wBot = H * 0.93, wW = 13;
+        ctx.fillStyle = "rgba(20,30,44,.9)";
+        ctx.fillRect(wx - wW / 2, wTop - 14, wW, wBot - wTop + 14);
+        ctx.strokeStyle = "rgba(220,228,240,.75)";
+        ctx.lineWidth = 1.6;
+        ctx.strokeRect(wx - wW / 2, wTop - 14, wW, wBot - wTop + 14);
+        // screen (dashes at depth)
+        ctx.strokeStyle = "rgba(220,228,240,.5)";
+        for (let y = wBot - 36; y < wBot - 4; y += 7) {
+          ctx.beginPath(); ctx.moveTo(wx - wW / 2 - 3, y); ctx.lineTo(wx - wW / 2 + 2, y); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(wx + wW / 2 - 2, y); ctx.lineTo(wx + wW / 2 + 3, y); ctx.stroke();
+        }
+        // water level inside the casing tracks the water table
+        const wl = wtSurf(wx) + 3;
+        ctx.fillStyle = "rgba(90,169,230,.7)";
+        ctx.fillRect(wx - wW / 2 + 1.5, wl, wW - 3, wBot - wl - 2);
+        // wellhead cap
+        ctx.fillStyle = "rgba(220,228,240,.85)";
+        ctx.fillRect(wx - wW / 2 - 4, wTop - 20, wW + 8, 7);
+        ctx.font = "600 15px " + SANS;
+        ctx.fillStyle = "rgba(220,228,240,.9)";
+        ctx.textAlign = "center";
+        ctx.fillText("monitoring well", wx, wTop - 30);
+
+        // ── tree (canopy interception site) on the valley floor ──
+        const tx = W * 0.52, tTop = valleyY - H * 0.14;
+        ctx.strokeStyle = "rgba(160,130,95,.9)";
+        ctx.lineWidth = 5;
+        ctx.beginPath(); ctx.moveTo(tx, valleyY); ctx.lineTo(tx, tTop + 16); ctx.stroke();
+        ctx.fillStyle = "rgba(110,180,120,.8)";
+        [[0, 0, 26], [-20, 12, 19], [20, 12, 19]].forEach(function (c) {
+          ctx.beginPath(); ctx.arc(tx + c[0], tTop + c[1], c[2], 0, Math.PI * 2); ctx.fill();
+        });
+
+        // ── snowpack on the peak (accumulates, then melts) ──
+        const acc = smooth01((T - 0.6) / 2.6);
+        const melt = smooth01((T - 5.4) / 2.6);
+        const packA = Math.max(0, acc - melt) * fade;
+        if (packA > 0.01) {
+          ctx.globalAlpha = Math.min(1, packA * 1.5);
+          const th = 10 + 12 * packA;
+          ctx.strokeStyle = "rgba(235,242,250,.95)";
+          ctx.lineWidth = th;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          for (let x = peakX * 0.35; x <= peakX + (footX - peakX) * 0.42; x += 5) {
+            const y = surfY(x) - th / 2 + 2;
+            x === peakX * 0.35 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.lineCap = "butt";
+          ctx.globalAlpha = 1;
+        }
+
+        // ── weather: snow over the mountain, rain over the valley ──
+        const storm = smooth01((T - 0.4) / 0.6) * (1 - smooth01((T - 4.6) / 0.8)) * fade;
+        if (storm > 0.01) {
+          ctx.globalAlpha = storm;
+          ctx.fillStyle = "rgba(200,215,235,.28)";
+          [[W * 0.14, H * 0.06, 30], [W * 0.20, H * 0.05, 24], [W * 0.55, H * 0.07, 30], [W * 0.62, H * 0.06, 24], [W * 0.48, H * 0.08, 24]].forEach(function (c) {
+            ctx.beginPath(); ctx.arc(c[0], c[1], c[2], 0, Math.PI * 2); ctx.fill();
+          });
+          // snowflakes (mountain)
+          ctx.fillStyle = "rgba(235,242,250,.9)";
+          for (let k = 0; k < 18; k++) {
+            const sx = W * 0.04 + W * 0.24 * rnd(k + 30);
+            const ph = (T * 0.35 + rnd(k + 80)) % 1;
+            const sy = H * 0.10 + (surfY(sx) - H * 0.13) * ph;
+            ctx.beginPath(); ctx.arc(sx + 4 * Math.sin(T * 2 + k), sy, 1.8, 0, Math.PI * 2); ctx.fill();
+          }
+          // rain streaks (valley)
+          ctx.strokeStyle = "rgba(127,209,230,.6)";
+          ctx.lineWidth = 1.3;
+          for (let k = 0; k < 22; k++) {
+            const sx = W * 0.42 + W * 0.26 * rnd(k + 130);
+            const ph = (T * 1.7 + rnd(k + 180)) % 1;
+            const sy = H * 0.10 + (valleyY - H * 0.13) * ph;
+            ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 2, sy + 9); ctx.stroke();
+          }
+          ctx.font = "600 15px " + SANS;
+          ctx.textAlign = "center";
+          ctx.fillStyle = "rgba(235,242,250,.95)";
+          ctx.fillText("snow", W * 0.17, H * 0.05 - 8);
+          ctx.fillStyle = "rgba(127,209,230,.95)";
+          ctx.fillText("rain", W * 0.55, H * 0.05 - 4);
+          ctx.globalAlpha = 1;
+        }
+
+        // ── losses: interception at the canopy, then evapotranspiration ──
+        const pInt = smooth01((T - 2.4) / 0.8) * (1 - smooth01((T - 7.6) / 0.8)) * fade;
+        if (pInt > 0.01) {
+          ctx.globalAlpha = pInt;
+          ctx.fillStyle = "rgba(255,196,120,.9)";
+          for (let k = 0; k < 5; k++) {
+            const ph = (T * 0.5 + rnd(k + 240)) % 1;
+            ctx.beginPath();
+            ctx.arc(tx - 22 + 44 * rnd(k + 260), tTop + 6 - 26 * ph, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.font = "600 15px " + SANS;
+          ctx.textAlign = "left";
+          ctx.fillStyle = "rgba(255,196,120,.95)";
+          ctx.fillText("interception", tx + 34, tTop - 12);
+          ctx.globalAlpha = 1;
+        }
+        const pET = smooth01((T - 3.6) / 0.9) * (1 - smooth01((T - 8.6) / 0.8)) * fade;
+        if (pET > 0.01) {
+          ctx.globalAlpha = pET;
+          ctx.strokeStyle = "rgba(255,180,84,.8)";
+          ctx.lineWidth = 1.6;
+          [tx - 40, tx + 46, tx + 110].forEach(function (ax, i) {
+            const yb = ax > tx + 80 ? valleyY : tTop + 4;
+            const rise = 26 + 6 * i;
+            ctx.beginPath();
+            for (let u = 0; u <= 1; u += 0.08) {
+              const y = yb - rise * u - 8 * smooth01((T * 0.6) % 1);
+              const x = ax + 4 * Math.sin(u * 9 + T * 3);
+              u ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+            }
+            ctx.stroke();
+          });
+          ctx.font = "600 15px " + SANS;
+          ctx.textAlign = "left";
+          ctx.fillStyle = "rgba(255,180,84,.95)";
+          ctx.fillText("evapotranspiration", tx + 96, tTop + 6);
+          ctx.globalAlpha = 1;
+        }
+
+        // ── snowmelt runoff down the mountain front ──
+        const pRun = smooth01((T - 5.6) / 1.0) * (1 - smooth01((T - 10.4) / 1.0)) * fade;
+        if (pRun > 0.01) {
+          ctx.globalAlpha = pRun;
+          ctx.strokeStyle = "rgba(127,209,230,.85)";
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          for (let x = peakX + 6; x <= footX - 4; x += 5) {
+            const y = surfY(x) - 3 - 2 * Math.sin(x * 0.15 + T * 5);
+            x <= peakX + 6 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.font = "600 15px " + SANS;
+          ctx.textAlign = "left";
+          ctx.fillStyle = "rgba(127,209,230,.95)";
+          ctx.fillText("snowmelt · runoff", W * 0.205, surfY(W * 0.26) - 14);
+          ctx.globalAlpha = 1;
+        }
+
+        // ── infiltration + percolation plumes ──
+        function plume(cx, t0, dur, w0, w1, label) {
+          const u = smooth01((T - t0) / dur);
+          if (u <= 0 || fade <= 0) return 0;
+          ctx.globalAlpha = fade;
+          const y0 = surfY(cx), y1 = wtSurf(cx) - 2;
+          const headY = y0 + (y1 - y0) * u;
+          const wHead = w0 + (w1 - w0) * u;
+          ctx.beginPath();
+          ctx.moveTo(cx - w0 / 2, y0);
+          ctx.lineTo(cx - wHead / 2, headY);
+          ctx.quadraticCurveTo(cx, headY + 12, cx + wHead / 2, headY);
+          ctx.lineTo(cx + w0 / 2, y0);
+          ctx.closePath();
+          const pg = ctx.createLinearGradient(0, y0, 0, headY + 12);
+          pg.addColorStop(0, "rgba(88,207,195,.08)");
+          pg.addColorStop(0.75, "rgba(88,207,195,.2)");
+          pg.addColorStop(1, "rgba(88,207,195,.45)");
+          ctx.fillStyle = pg;
+          ctx.fill();
+          const hg = ctx.createRadialGradient(cx, headY, 2, cx, headY, wHead);
+          hg.addColorStop(0, "rgba(120,225,210,.5)");
+          hg.addColorStop(1, "rgba(120,225,210,0)");
+          ctx.fillStyle = hg;
+          ctx.beginPath(); ctx.arc(cx, headY, wHead, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+          return u;
+        }
+        const u1 = plume(W * 0.33, 6.4, 5.2, 18, 40);
+        const u2 = plume(W * 0.52, 7.0, 5.0, 14, 30);
+        const pLab = smooth01((T - 7.2) / 0.8) * (1 - smooth01((T - 11.6) / 0.8)) * fade;
+        if (pLab > 0.01) {
+          ctx.globalAlpha = pLab;
+          ctx.font = "600 15px " + SANS;
+          ctx.textAlign = "left";
+          ctx.fillStyle = "rgba(120,225,210,.95)";
+          ctx.fillText("infiltration · percolation", W * 0.375, (valleyY + wtBase) / 2 + 6);
+          ctx.globalAlpha = 1;
+        }
+
+        // ── the well records the rise ──
+        const pRec = smooth01((T - 13.2) / 1.0) * fade;
+        if (pRec > 0.01) {
+          ctx.globalAlpha = pRec;
+          const ringR = 26 + 10 * Math.sin(T * 2.4);
+          ctx.strokeStyle = "rgba(255,180,84,.8)";
+          ctx.lineWidth = 1.6;
+          ctx.beginPath(); ctx.ellipse(wx, wl, Math.max(18, ringR), 8, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.font = "italic 600 17px 'Iowan Old Style', Georgia, serif";
+          ctx.textAlign = "left";
+          ctx.fillStyle = "#ffb454";
+          ctx.fillText("the water-table rise,", wx + 40, wl - 16);
+          ctx.fillText("recorded at the well", wx + 40, wl + 6);
+          ctx.globalAlpha = 1;
+        }
+      }
+    });
+  })();
+
+  // ---- 13b · management implications: subsurface recharge cross-section ----
+  (function () {
+    let elapsed = 0;
+    const CYC = 12;                                   // full loop: rain → percolation → mound → brace → fade
+    function rnd(i) { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
     reg("s-implic", {
       enter: function () { elapsed = 0; },
       tick: function (dt) {
@@ -1540,118 +1829,212 @@
         if (!f) return;
         const ctx = f.ctx, W = f.w, H = f.h;
         ctx.clearRect(0, 0, W, H);
-        const T = elapsed % 9;
+        const T = elapsed % CYC;
+        const fade = T > CYC - 0.7 ? smooth01((CYC - T) / 0.7) : 1;   // dynamic layer fades for a clean loop
         const padL = 70, padR = 70;
         const X = function (i) { return padL + (W - padL - padR) * i / 3; };
-        const groundY = H * 0.52, wtY = H * 0.76;
+        const groundY = H * 0.30, wtY = H * 0.72;
+        const rainX = X(1);
 
-        // ground surface + aquifer zone + water table
-        ctx.strokeStyle = "rgba(147,164,188,.45)";
-        ctx.lineWidth = 1.4;
+        // ── static geology ──
+        // unsaturated zone: faint sediment wash + deterministic stipple
+        const gz = ctx.createLinearGradient(0, groundY, 0, wtY);
+        gz.addColorStop(0, "rgba(170,150,120,.10)");
+        gz.addColorStop(1, "rgba(170,150,120,.045)");
+        ctx.fillStyle = gz;
+        ctx.fillRect(padL - 26, groundY, W - padL - padR + 52, wtY - groundY);
+        for (let k = 0; k < 160; k++) {
+          const sx = padL - 20 + (W - padL - padR + 40) * rnd(k);
+          const sy = groundY + 8 + (wtY - groundY - 16) * rnd(k + 500);
+          ctx.fillStyle = "rgba(190,175,150," + (0.07 + 0.09 * rnd(k + 900)).toFixed(3) + ")";
+          ctx.beginPath(); ctx.arc(sx, sy, 1 + 1.4 * rnd(k + 1300), 0, Math.PI * 2); ctx.fill();
+        }
+        // land surface with grass ticks
+        ctx.strokeStyle = "rgba(147,164,188,.5)";
+        ctx.lineWidth = 1.6;
         ctx.beginPath(); ctx.moveTo(padL - 26, groundY); ctx.lineTo(W - padR + 26, groundY); ctx.stroke();
-        ctx.fillStyle = "rgba(90,169,230,.06)";
-        ctx.fillRect(padL - 26, wtY, W - padL - padR + 52, H - wtY - 10);
-        ctx.strokeStyle = "rgba(90,169,230,.4)";
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath(); ctx.moveTo(padL - 26, wtY); ctx.lineTo(W - padR + 26, wtY); ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.font = "16px 'Avenir Next', sans-serif";
-        ctx.fillStyle = "rgba(147,164,188,.7)";
-        ctx.textAlign = "left";
-        ctx.fillText("land surface", padL - 22, groundY - 6);
-        ctx.fillText("water table", padL - 22, wtY - 6);
+        ctx.strokeStyle = "rgba(127,209,140,.4)";
+        ctx.lineWidth = 1;
+        for (let k = 0; k < 60; k++) {
+          const gx = padL - 20 + (W - padL - padR + 40) * (k / 59);
+          ctx.beginPath(); ctx.moveTo(gx, groundY); ctx.lineTo(gx + 2 * (rnd(k + 60) - 0.5), groundY - 4 - 3 * rnd(k)); ctx.stroke();
+        }
 
-        // year ticks (labels along the bottom, clear of the schematic)
+        // ── water table with storage mound (rises when the front arrives) ──
+        const p3 = smooth01((T - 7.6) / 1.4) * fade;
+        const sig = (X(1) - X(0)) * 0.55;
+        function wtSurf(x) {
+          const d = x - rainX;
+          return wtY - H * 0.10 * p3 * Math.exp(-(d * d) / (2 * sig * sig));
+        }
+        // saturated zone fill
+        ctx.beginPath();
+        ctx.moveTo(padL - 26, H - 8);
+        for (let x = padL - 26; x <= W - padR + 26; x += 4) ctx.lineTo(x, wtSurf(x));
+        ctx.lineTo(W - padR + 26, H - 8);
+        ctx.closePath();
+        const bz = ctx.createLinearGradient(0, wtY - H * 0.1, 0, H);
+        bz.addColorStop(0, "rgba(90,169,230,.20)");
+        bz.addColorStop(1, "rgba(90,169,230,.05)");
+        ctx.fillStyle = bz;
+        ctx.fill();
+        // water-table line
+        ctx.strokeStyle = "rgba(90,169,230,.75)";
+        ctx.lineWidth = 1.8;
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        for (let x = padL - 26; x <= W - padR + 26; x += 4)
+          x === padL - 26 ? ctx.moveTo(x, wtSurf(x)) : ctx.lineTo(x, wtSurf(x));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // zone labels
+        ctx.font = "16px 'Avenir Next', sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillStyle = "rgba(147,164,188,.75)";
+        ctx.fillText("land surface", padL - 22, groundY - 8);
+        ctx.fillText("water table", padL - 22, wtY + 20);
+        ctx.fillStyle = "rgba(170,155,130,.8)";
+        ctx.fillText("unsaturated zone", padL - 22, (groundY + wtY) / 2 + 4);
+
+        // ── timeline along the bottom with a sweeping time cursor ──
         ctx.textAlign = "center";
         ["year n − 1", "year n", "year n + 1", "year n + 2"].forEach(function (lab, i) {
           ctx.strokeStyle = "rgba(147,164,188,.5)";
-          ctx.beginPath(); ctx.moveTo(X(i), groundY - 4); ctx.lineTo(X(i), groundY + 4); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(X(i), H - 26); ctx.lineTo(X(i), H - 20); ctx.stroke();
           ctx.fillStyle = "rgba(147,164,188,.8)";
-          ctx.fillText(lab, X(i), H - 10);
+          ctx.font = "16px 'Avenir Next', sans-serif";
+          ctx.fillText(lab, X(i), H - 6);
         });
+        ctx.strokeStyle = "rgba(147,164,188,.35)";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(X(0), H - 23); ctx.lineTo(X(3), H - 23); ctx.stroke();
 
-        // 1 · winter precipitation bar at year n
-        const p1 = smooth01((T - 0.5) / 1.0);
-        if (p1 > 0) {
-          const bh = H * 0.28 * p1;
-          ctx.fillStyle = "rgba(127,209,140,.55)";
-          ctx.fillRect(X(1) - 13, groundY - bh, 26, bh);
+        // ── 1 · rain event at year n ──
+        const rainOn = smooth01((T - 0.3) / 0.5) * (1 - smooth01((T - 2.6) / 0.6));
+        if (rainOn > 0.01) {
+          ctx.globalAlpha = rainOn * fade;
+          const cy = H * 0.10;
+          ctx.fillStyle = "rgba(200,215,235,.30)";
+          [[-26, 0, 20], [0, -8, 25], [26, 0, 19]].forEach(function (c) {
+            ctx.beginPath(); ctx.arc(rainX + c[0], cy + c[1], c[2], 0, Math.PI * 2); ctx.fill();
+          });
+          ctx.strokeStyle = "rgba(127,209,230,.65)";
+          ctx.lineWidth = 1.4;
+          for (let k = 0; k < 16; k++) {
+            const dx = (rnd(k + 40) - 0.5) * 110;
+            const ph = (T * 1.6 + rnd(k)) % 1;
+            const dy = cy + 26 + (groundY - cy - 30) * ph;
+            ctx.beginPath(); ctx.moveTo(rainX + dx, dy); ctx.lineTo(rainX + dx - 2, dy + 9); ctx.stroke();
+          }
           ctx.fillStyle = "rgba(127,209,140,.95)";
           ctx.font = "600 17px 'Avenir Next', sans-serif";
           ctx.textAlign = "right";
-          ctx.fillText("annual precipitation", X(1) - 20, groundY - bh * 0.5);
+          ctx.fillText("annual precipitation", rainX - 78, cy + 12);
           ctx.textAlign = "center";
-        }
-
-        // 2 · recharge path arc: year n surface → the water table one to two years on
-        const p2 = smooth01((T - 1.8) / 1.6);
-        if (p2 > 0) {
-          const x0 = X(1), y0 = groundY, x1 = X(2.3), y1 = wtY - 4;
-          const cx = (x0 + x1) / 2, cy = groundY + (wtY - groundY) * 0.18;
-          ctx.strokeStyle = "rgba(88,207,195,.8)";
-          ctx.lineWidth = 2;
-          ctx.setLineDash([6, 5]);
-          ctx.beginPath();
-          const steps = Math.max(2, Math.round(40 * p2));
-          for (let s = 0; s <= steps; s++) {
-            const u = p2 * s / steps;
-            const bx = (1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * cx + u * u * x1;
-            const by = (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * cy + u * u * y1;
-            s ? ctx.lineTo(bx, by) : ctx.moveTo(bx, by);
-          }
-          ctx.stroke();
-          ctx.setLineDash([]);
-          // travelling parcel
-          const u = p2;
-          const hx = (1 - u) * (1 - u) * x0 + 2 * (1 - u) * u * cx + u * u * x1;
-          const hy = (1 - u) * (1 - u) * y0 + 2 * (1 - u) * u * cy + u * u * y1;
-          if (p2 < 1) {
-            ctx.beginPath(); ctx.fillStyle = "rgba(88,207,195,.95)";
-            ctx.arc(hx, hy, 4, 0, Math.PI * 2); ctx.fill();
-          }
-          ctx.globalAlpha = Math.min(1, p2 * 1.6);
-          ctx.fillStyle = "rgba(147,164,188,.85)";
-          ctx.font = "16px 'Avenir Next', sans-serif";
-          ctx.fillText("infiltration · percolation through the unsaturated zone", (x0 + x1) / 2, cy + 26);
           ctx.globalAlpha = 1;
         }
 
-        // 3 · storage response mound spanning years n+1 → n+2 (wells peak at +2)
-        const p3 = smooth01((T - 3.6) / 1.2);
-        if (p3 > 0) {
-          const mc = X(2.5), amp = H * 0.13 * p3, sig = (X(1) - X(0)) * 0.3;
+        // ── 2 · wetting front percolating through the unsaturated zone ──
+        const uF = smooth01((T - 1.2) / 6.8);          // 0→1 over ≈ two model years
+        if (uF > 0 && fade > 0) {
+          ctx.globalAlpha = fade;
+          const headY = groundY + (wtY - groundY - 4) * uF;
+          const wTop = 16, wHead = 16 + 26 * uF;       // plume widens with depth
+          // moist trail column
           ctx.beginPath();
-          ctx.moveTo(mc - sig * 3, wtY);
-          for (let x = -sig * 3; x <= sig * 3; x += 4)
-            ctx.lineTo(mc + x, wtY - amp * Math.exp(-(x * x) / (2 * sig * sig)));
-          ctx.lineTo(mc + sig * 3, wtY);
+          ctx.moveTo(rainX - wTop / 2, groundY);
+          ctx.lineTo(rainX - wHead / 2, headY);
+          ctx.quadraticCurveTo(rainX, headY + 14, rainX + wHead / 2, headY);
+          ctx.lineTo(rainX + wTop / 2, groundY);
           ctx.closePath();
-          ctx.fillStyle = "rgba(88,207,195,.4)";
+          const pg = ctx.createLinearGradient(0, groundY, 0, headY + 14);
+          pg.addColorStop(0, "rgba(88,207,195,.10)");
+          pg.addColorStop(0.75, "rgba(88,207,195,.22)");
+          pg.addColorStop(1, "rgba(88,207,195,.50)");
+          ctx.fillStyle = pg;
           ctx.fill();
-          ctx.strokeStyle = "rgba(88,207,195,.85)";
-          ctx.lineWidth = 1.8;
-          ctx.stroke();
-          ctx.fillStyle = "rgba(120,215,205,.95)";
-          ctx.font = "600 17px 'Avenir Next', sans-serif";
-          ctx.fillText("storage response", mc, wtY - amp - 10);
+          // bright wetting front at the head
+          const hg = ctx.createRadialGradient(rainX, headY, 2, rainX, headY, wHead * 0.9);
+          hg.addColorStop(0, "rgba(120,225,210,.55)");
+          hg.addColorStop(1, "rgba(120,225,210,0)");
+          ctx.fillStyle = hg;
+          ctx.beginPath(); ctx.arc(rainX, headY, wHead * 0.9, 0, Math.PI * 2); ctx.fill();
+          // trickling parcels inside the plume
+          ctx.fillStyle = "rgba(150,230,220,.8)";
+          for (let k = 0; k < 6; k++) {
+            const ph = ((T * 0.22 + rnd(k + 70)) % 1) * uF;
+            const py = groundY + (headY - groundY) * ph;
+            const px = rainX + (rnd(k + 200) - 0.5) * (wTop + (wHead - wTop) * ph) * 0.8;
+            ctx.beginPath(); ctx.arc(px, py + 4, 1.8, 0, Math.PI * 2); ctx.fill();
+          }
+          // elapsed-time chip riding beside the front: depth ↦ years
+          const yrs = 2 * uF;
+          if (uF > 0.06 && uF < 0.995) {
+            ctx.font = "600 16px 'Avenir Next', sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillStyle = "rgba(255,180,84,.95)";
+            ctx.fillText("+" + yrs.toFixed(1) + " yr", rainX + wHead / 2 + 12, headY + 5);
+            ctx.textAlign = "center";
+          }
+          // percolation label
+          const lp = smooth01((T - 2.6) / 0.8) * (1 - smooth01((T - 7.3) / 0.6)) * fade;
+          if (lp > 0) {
+            ctx.globalAlpha = lp;
+            ctx.fillStyle = "rgba(147,164,188,.85)";
+            ctx.font = "16px 'Avenir Next', sans-serif";
+            ctx.textAlign = "left";
+            ctx.fillText("percolation through", rainX + 66, (groundY + wtY) / 2 - 8);
+            ctx.fillText("the unsaturated zone", rainX + 66, (groundY + wtY) / 2 + 12);
+            ctx.textAlign = "center";
+            ctx.globalAlpha = fade;
+          }
+          // arrival ripple at the water table
+          const pr = smooth01((T - 7.7) / 0.9);
+          if (pr > 0 && pr < 1) {
+            ctx.strokeStyle = "rgba(120,225,210," + (0.7 * (1 - pr)).toFixed(3) + ")";
+            ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.ellipse(rainX, wtY, 10 + 46 * pr, 4 + 12 * pr, 0, 0, Math.PI * 2); ctx.stroke();
+          }
+          ctx.globalAlpha = 1;
         }
 
-        // 4 · lead-time brace
-        const p4 = smooth01((T - 5.0) / 0.8);
+        // time cursor sweeps year n → n+2 in step with the front
+        if (uF > 0 && fade > 0) {
+          const tcx = X(1) + (X(3) - X(1)) * uF;
+          ctx.globalAlpha = fade;
+          ctx.fillStyle = "rgba(255,180,84,.9)";
+          ctx.beginPath();
+          ctx.moveTo(tcx, H - 30); ctx.lineTo(tcx - 5, H - 38); ctx.lineTo(tcx + 5, H - 38);
+          ctx.closePath(); ctx.fill();
+          ctx.globalAlpha = 1;
+        }
+
+        // storage-response label on the mound
+        if (p3 > 0) {
+          ctx.globalAlpha = p3;
+          ctx.fillStyle = "rgba(120,215,205,.95)";
+          ctx.font = "600 17px 'Avenir Next', sans-serif";
+          ctx.fillText("storage response · year n + 1 → n + 2", rainX, wtSurf(rainX) - 12);
+          ctx.globalAlpha = 1;
+        }
+
+        // ── 3 · lead-time brace in the sky ──
+        const p4 = smooth01((T - 9.2) / 0.8) * fade;
         if (p4 > 0) {
           ctx.globalAlpha = p4;
-          const by = groundY - H * 0.36;
+          const by = H * 0.14;
           ctx.strokeStyle = "rgba(255,180,84,.9)";
           ctx.lineWidth = 1.8;
-          ctx.beginPath(); ctx.moveTo(X(1), by); ctx.lineTo(X(3), by); ctx.stroke();
-          [[X(1), 1], [X(3), -1]].forEach(function (e) {
+          ctx.beginPath(); ctx.moveTo(X(1) + 60, by); ctx.lineTo(X(3), by); ctx.stroke();
+          [[X(1) + 60, 1], [X(3), -1]].forEach(function (e) {
             ctx.beginPath();
             ctx.moveTo(e[0] + 6 * e[1], by - 4); ctx.lineTo(e[0], by); ctx.lineTo(e[0] + 6 * e[1], by + 4);
             ctx.stroke();
           });
           ctx.font = "italic 600 18px 'Iowan Old Style', Georgia, serif";
           ctx.fillStyle = "#ffb454";
-          ctx.fillText("1–2-year lead time", (X(1) + X(3)) / 2, by - 10);
+          ctx.fillText("1–2-year lead time", (X(1) + 60 + X(3)) / 2, by - 10);
           ctx.globalAlpha = 1;
         }
       }
