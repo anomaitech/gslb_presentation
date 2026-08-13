@@ -20,18 +20,18 @@
   const GWSA = [0.2, -0.16, -1.98, -3.47, 1.19, 1.09, 2.04, 1.14, -0.91, 1.5, 1.48,
     -0.12, -2.65, -3.53, -4.77, -3.68, -2.56, -0.17, -3.24, -6.15, -8.69, -7.0, -6.88];
 
-  // Per-method annual GWSa series, 2002–2023 (shared by the small-multiples and
+  // Per-method annual GWSa series, 2002–2024 (shared by the small-multiples and
   // overlay slides). GRACE-raw is the exact annual series; GRACE-Lf, GLDAS-2.2
   // and GWDM are traced (annual, approximate) from the paper's Figure 10;
   // GRACE-sw is the surface-water-adjusted series, i.e. GRACE-Lf ÷ Lf = 2 by definition.
   const LF = [-7.2, -3.8, -3.7, -0.8, 2.5, -1.2, 3.5, -1.0, -1.4, 3.1, -2.5,
-    -4.2, -5.3, -5.5, -6.6, -6.7, -5.8, -0.6, -3.5, -13.0, -13.6, -8.5];
+    -4.2, -5.3, -5.5, -6.6, -6.7, -5.8, -0.6, -3.5, -13.0, -13.6, -8.5, -8.9];
   const GLDAS = [-3.6, -3.4, -1.0, 2.6, 2.3, -1.6, -0.1, -1.5, -1.1, 3.5, -1.5,
-    -1.6, -1.6, -2.9, -1.5, 1.5, -1.7, 1.1, -2.4, -4.4, -4.8, -0.6];
+    -1.6, -1.6, -2.9, -1.5, 1.5, -1.7, 1.1, -2.4, -4.4, -4.8, -0.6, -0.2];
   const GWDM = [-0.5, -3.5, -1.5, 2.7, 2.4, -1.3, 0.0, -0.6, -1.8, 3.6, -1.2,
-    -2.3, -5.0, -4.6, -4.3, -2.9, -6.3, -2.4, -5.4, -9.7, -10.0, -6.1];
+    -2.3, -5.0, -4.6, -4.3, -2.9, -6.3, -2.4, -5.4, -9.7, -10.0, -6.1, -2.6];
   const SERIES = [
-    { name: "GRACE-raw", col: "#5aa9e6", v: GWSA.slice(0, 22) },
+    { name: "GRACE-raw", col: "#5aa9e6", v: GWSA.slice(0, 23) },
     { name: "GRACE-sw", col: "#7fd1c8", v: LF.map(function (x) { return x / 2; }) },
     { name: "GRACE-Lf", col: "#ffb454", v: LF },
     { name: "GLDAS-2.2", col: "#e6704b", v: GLDAS },
@@ -729,7 +729,7 @@
   (function () {
     const DRAW = 2.7, STAGGER = 3.3, HOLD = 5.0;    // per-series draw, spacing, final hold
     const TOTAL = STAGGER * SERIES.length + HOLD;
-    const VMIN = -15, VMAX = 4.5, N = 22;
+    const VMIN = -15, VMAX = 4.5, N = 23;
     let elapsed = 0;
 
     reg("s-five", {
@@ -769,7 +769,8 @@
           ctx.textAlign = "right"; ctx.fillText(v.toString(), padL - 8, Y(v) + 4);
         });
         ctx.textAlign = "center";
-        for (let y = 2002; y <= 2022; y += 4) ctx.fillText(y.toString(), X(y - 2002), H - padB + 22);
+        for (let y = 2002; y <= 2020; y += 4) ctx.fillText(y.toString(), X(y - 2002), H - padB + 22);
+        ctx.fillText("2024", X(22), H - padB + 22);
         ctx.textAlign = "left";
         ctx.save();
         ctx.translate(14, (padT + H - padB) / 2); ctx.rotate(-Math.PI / 2);
@@ -785,7 +786,7 @@
           if (prog < 1) active = s;
           const isCurrent = (T - (s + 1) * STAGGER < 0) || holdP > 0;
           const alpha = holdP > 0 ? 0.9 : (isCurrent ? 1 : 0.42);
-          const tMax = prog * (N - 1);
+          const tMax = prog * (SERIES[s].v.length - 1);
           ctx.strokeStyle = SERIES[s].col;
           ctx.globalAlpha = alpha;
           ctx.lineWidth = isCurrent && holdP === 0 ? 3 : 2.1;
