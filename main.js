@@ -478,7 +478,7 @@
         }
         ctx.font = "500 17px 'Avenir Next', sans-serif";
         ctx.fillStyle = "rgba(233,238,246,.55)";
-        ctx.fillText("~100 km grid cells", bx + 8, by + 18);
+        ctx.fillText("~100 km (≈60 mi) grid cells", bx + 8, by + 18);
 
         // coarse measurement blocks (~300 km), emphasized while aggregating
         if (phase >= 1) {
@@ -493,7 +493,7 @@
           }
           ctx.setLineDash([]);
           ctx.fillStyle = "rgba(255,180,84," + a.toFixed(2) + ")";
-          ctx.fillText("~300 km measurement blocks", bx + size - 200, by + size - 10);
+          ctx.fillText("~300 km (≈190 mi) measurement blocks", bx + size - 200, by + size - 10);
         }
 
         // basin outline on top

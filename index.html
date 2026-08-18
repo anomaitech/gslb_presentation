@@ -27,7 +27,7 @@
 
 <!-- ═══════════════ 2 · THE BASIN ═══════════════ -->
 <section class="slide" id="s-basin"
-  data-notes="[~50 s] First, the setting. The Great Salt Lake Basin covers about 93,000 square kilometers across Utah, Idaho, Wyoming, and Nevada. It is a terminal, closed basin: the Bear, Weber, and Jordan rivers drain toward Great Salt Lake, and water leaves only by evaporation — which makes the basin a natural laboratory for storage accounting. As a spoken aside: over the study period river inflows to the lake declined substantially and the lake reached record-low levels, several meters below its long-term average. Municipal and agricultural pumping is concentrated along the Wasatch Front — Ogden, Salt Lake City, and Provo — where most of the basin's population lives.">
+  data-notes="[~50 s] First, the setting. The Great Salt Lake Basin covers about 93,000 square kilometers — roughly 36,000 square miles — across Utah, Idaho, Wyoming, and Nevada. It is a terminal, closed basin: the Bear, Weber, and Jordan rivers drain toward Great Salt Lake, and water leaves only by evaporation — which makes the basin a natural laboratory for storage accounting. As a spoken aside: over the study period river inflows to the lake declined substantially and the lake reached record-low levels, several meters below its long-term average. Municipal and agricultural pumping is concentrated along the Wasatch Front — Ogden, Salt Lake City, and Provo — where most of the basin's population lives.">
   <div class="two-col">
     <div class="col-text">
       <p class="kicker" data-reveal style="--d:.1s">The setting</p>
@@ -35,7 +35,7 @@
       <div class="statstack solo">
         <div class="stat" data-reveal style="--d:.6s">
           <span class="stat-num"><span data-count="93000" data-dur="2.2" data-grp="1">0</span> <small>km²</small></span>
-          <span class="stat-cap">closed basin spanning Utah, Idaho, Wyoming, and Nevada; the Bear, Weber, and Jordan rivers drain toward Great Salt Lake, and evaporation is the only outflow</span>
+          <span class="stat-cap">(≈ 36,000 mi²) closed basin spanning Utah, Idaho, Wyoming, and Nevada; the Bear, Weber, and Jordan rivers drain toward Great Salt Lake, and evaporation is the only outflow</span>
         </div>
       </div>
       <p class="footnote" data-reveal style="--d:1.05s">Groundwater pumping is concentrated along the Wasatch Front (Ogden, Salt Lake City, Provo)</p>
@@ -107,7 +107,7 @@
 
 <!-- ═══════════════ 4 · GRACE 3D ═══════════════ -->
 <section class="slide slide-dark3d" id="s-grace3d" data-anim3d="grace"
-  data-notes="[~50 s] Method one, satellite gravimetry. GRACE is two satellites flying in formation about 220 kilometers apart, connected by a microwave ranging link. When the leading satellite approaches excess water mass, gravity accelerates it and the separation stretches; as it passes, the follower catches up. The link resolves those changes at the micron level, so mass change becomes a distance signal. Since 2018, GRACE Follow-On has continued the record on the same principle. The essential caveat is resolution: the effective footprint is roughly 300 by 300 kilometers — comparable to the basin itself — and that has consequences we address next.">
+  data-notes="[~50 s] Method one, satellite gravimetry. GRACE is two satellites flying in formation about 220 kilometers apart, connected by a microwave ranging link. When the leading satellite approaches excess water mass, gravity accelerates it and the separation stretches; as it passes, the follower catches up. The link resolves those changes at the micron level, so mass change becomes a distance signal. Since 2018, GRACE Follow-On has continued the record on the same principle. The essential caveat is resolution: the effective footprint is roughly 300 by 300 kilometers, about 190 miles on a side — comparable to the basin itself — and that has consequences we address next.">
   <div class="scene3d-holder">
     <canvas id="graceCanvas"></canvas>
     <div class="hud" id="graceHUD">
@@ -127,12 +127,12 @@
       <li data-reveal style="--d:.6s">A change in water mass produces a gravity anomaly</li>
       <li data-reveal style="--d:.85s">The anomaly accelerates the lead satellite and the <strong>separation changes</strong></li>
       <li data-reveal style="--d:1.1s">The microwave link resolves that change at the <strong>micron</strong> level</li>
-      <li data-reveal style="--d:1.4s" class="warn">The effective footprint, however, is <strong>~300 × 300 km</strong>, comparable to the basin itself</li>
+      <li data-reveal style="--d:1.4s" class="warn">The effective footprint, however, is <strong>~300 × 300 km</strong> (≈ 190 × 190 mi), comparable to the basin itself</li>
     </ul>
     <div class="range-readout" data-reveal style="--d:.7s">
       <span class="rr-label">live ranging signal · Δ separation</span>
       <span class="rr-value"><span id="rangeKm">+0.0</span> µm</span>
-      <span class="rr-delta" id="rangeDelta">nominal separation ≈ 220 km · stretch exaggerated in view</span>
+      <span class="rr-delta" id="rangeDelta">nominal separation ≈ 220 km (≈ 135 mi) · stretch exaggerated in view</span>
     </div>
   </div>
 </section>
@@ -146,8 +146,8 @@
     <div class="leak-stage" data-reveal style="--d:.5s">
       <canvas id="leakCanvas"></canvas>
       <div class="leak-captions">
-        <div class="leak-cap" id="leakCap0"><strong>1 · The true signal</strong><br>mass confined to the basin's cells on the ~100 km grid</div>
-        <div class="leak-cap" id="leakCap1"><strong>2 · Measured at ~300 km, delivered at ~100 km</strong><br>each coarse block is averaged and redistributed onto the fine grid, so mass spills across the boundary</div>
+        <div class="leak-cap" id="leakCap0"><strong>1 · The true signal</strong><br>mass confined to the basin's cells on the ~100 km (≈ 60 mi) grid</div>
+        <div class="leak-cap" id="leakCap1"><strong>2 · Measured at ~300 km (≈ 190 mi), delivered at ~100 km</strong><br>each coarse block is averaged and redistributed onto the fine grid, so mass spills across the boundary</div>
         <div class="leak-cap" id="leakCap2"><strong>3 · The correction</strong><br>a leakage factor <em>L<sub>f</sub> = 2</em> restores the basin-mean amplitude</div>
       </div>
     </div>
@@ -359,7 +359,7 @@
 
 <!-- ═══════════════ 12 · DROUGHT LOSS ═══════════════ -->
 <section class="slide" id="s-loss" data-anim="loss"
-  data-notes="[~45 s] Putting a volume on the worst of it: over the 2011-to-2016 drought interval the corrected GRACE series implies a groundwater loss of approximately 10.1 cubic kilometers. We can check that against a fully independent technique. Young and coauthors (2021) inverted GPS observations of crustal loading — the solid earth flexing as the water load is removed — and obtained 10.9 plus or minus 2.8 cubic kilometers for the same interval. Satellite gravimetry and GPS-observed crustal deformation share no instruments, no data, and no processing assumptions, yet they agree on the magnitude of the loss.">
+  data-notes="[~45 s] Putting a volume on the worst of it: over the 2011-to-2016 drought interval the corrected GRACE series implies a groundwater loss of approximately 10.1 cubic kilometers — about 8.2 million acre-feet. We can check that against a fully independent technique. Young and coauthors (2021) inverted GPS observations of crustal loading — the solid earth flexing as the water load is removed — and obtained 10.9 plus or minus 2.8 cubic kilometers for the same interval. Satellite gravimetry and GPS-observed crustal deformation share no instruments, no data, and no processing assumptions, yet they agree on the magnitude of the loss.">
   <div class="center-col wide">
     <p class="kicker" data-reveal style="--d:.1s">Results · drought-interval loss</p>
     <h2 data-reveal style="--d:.25s">Quantifying the 2011–2016 loss</h2>
@@ -367,13 +367,13 @@
       <div class="loss-col">
         <div class="tank"><div class="tank-water" id="tankWater"></div><div class="tank-grid"></div></div>
         <p class="loss-big">−<span id="lossVal">0.0</span> <small>km³</small></p>
-        <p class="loss-cap"><strong>This study</strong> · groundwater lost 2011–2016<br>(GRACE-L<sub>f</sub>)</p>
+        <p class="loss-cap"><strong>This study</strong> · groundwater lost 2011–2016 (GRACE-L<sub>f</sub>)<br>≈ <strong>8.2 million acre-feet</strong></p>
       </div>
       <div class="loss-vs">≈</div>
       <div class="loss-col">
         <div class="whisker-wrap"><canvas id="whiskerCanvas"></canvas></div>
         <p class="loss-big">−10.9 <small>± 2.8 km³</small></p>
-        <p class="loss-cap"><strong>Independent check</strong> · GPS crustal-loading inversion<br>(Young et al., 2021)</p>
+        <p class="loss-cap"><strong>Independent check</strong> · GPS crustal-loading inversion (Young et al., 2021)<br>≈ 8.8 ± 2.3 million acre-feet</p>
       </div>
     </div>
     <p class="punch" data-reveal style="--d:1.2s">Two physically unrelated measurements, satellite gravimetry and<br>GPS-observed crustal loading, agree on the magnitude of the loss.</p>
@@ -422,7 +422,7 @@
       </div>
       <div class="limit-card" data-reveal style="--d:1.4s">
         <h3>A sustained deficit</h3>
-        <p>Inter-drought recovery has been partial: 2011–2016 alone removed <strong>≈10.1 km³</strong>, and the anomaly reached −8.7 cm in 2022.</p>
+        <p>Inter-drought recovery has been partial: 2011–2016 alone removed <strong>≈10.1 km³</strong> (≈ 8.2 million acre-ft), and the anomaly reached −8.7 cm (−3.4 in) in 2022.</p>
       </div>
     </div>
   </div>
@@ -431,7 +431,7 @@
 
 <!-- ═══════════════ 14 · LIMITS ═══════════════ -->
 <section class="slide" id="s-limits" data-anim="limits"
-  data-notes="[~50 s] Three limitations deserve attention. First, imputation: the Extreme Learning Machine performs well on gaps up to about three years, but beyond that nothing constrains the trajectory inside the gap, and its predictions drift toward the climatological mean, damping exactly the drought signals we care about. Second, prevalence: roughly half of the wells with usable records contain gaps longer than three years, and a majority of the gap-years fall within the drought intervals of greatest interest. Third, structure: a single basin-wide specific yield of 0.15 and GRACE's 300-kilometer footprint mean the absolute volumes carry real uncertainty even where the timing agrees. These limitations point directly at future work: an uncertainty analysis that tests alternative leakage factors, baseline periods, and storage parameters, to better bound the reported trends and volumes.">
+  data-notes="[~50 s] Three limitations deserve attention. First, imputation: the Extreme Learning Machine performs well on gaps up to about three years, but beyond that nothing constrains the trajectory inside the gap, and its predictions drift toward the climatological mean, damping exactly the drought signals we care about. Second, prevalence: roughly half of the wells with usable records contain gaps longer than three years, and a majority of the gap-years fall within the drought intervals of greatest interest. Third, structure: a single basin-wide specific yield of 0.15 and GRACE's 300-kilometer — about 190-mile — footprint mean the absolute volumes carry real uncertainty even where the timing agrees. These limitations point directly at future work: an uncertainty analysis that tests alternative leakage factors, baseline periods, and storage parameters, to better bound the reported trends and volumes.">
   <div class="center-col wide">
     <p class="kicker" data-reveal style="--d:.1s">Limitations</p>
     <h2 data-reveal style="--d:.25s">Sources of uncertainty</h2>
@@ -458,13 +458,13 @@
 
 <!-- ═══════════════ 15 · TAKEAWAYS ═══════════════ -->
 <section class="slide slide-hero" id="s-end"
-  data-notes="[~45 s] To close. First, at the scale of a single basin, leakage correction is a prerequisite — it moves the satellite-to-well correlation from 0.17 to 0.77. Second, once corrected, satellite, model, and wells converge on one storage history, including a 2011-to-2016 loss of about 10.1 cubic kilometers that an independent GPS inversion corroborates. Third, the aquifer responds to precipitation with a one-to-two-year lag, which gives managers usable lead time. Fourth, the limiting factor is now the well record itself — an improved imputation method for multi-year gaps is a priority for future work. Fifth, a practical consequence: once the leakage factor is calibrated — Lf equals 2 for this basin — the GRACE-derived series scaled by that factor can serve as a reliable ongoing storage estimate without continuous dependence on the in-situ network, with the caveat that periodic re-validation against wells remains advisable. Thank you; I welcome your questions.">
+  data-notes="[~45 s] To close. First, at the scale of a single basin, leakage correction is a prerequisite — it moves the satellite-to-well correlation from 0.17 to 0.77. Second, once corrected, satellite, model, and wells converge on one storage history, including a 2011-to-2016 loss of about 10.1 cubic kilometers — roughly 8.2 million acre-feet — that an independent GPS inversion corroborates. Third, the aquifer responds to precipitation with a one-to-two-year lag, which gives managers usable lead time. Fourth, the limiting factor is now the well record itself — an improved imputation method for multi-year gaps is a priority for future work. Fifth, a practical consequence: once the leakage factor is calibrated — Lf equals 2 for this basin — the GRACE-derived series scaled by that factor can serve as a reliable ongoing storage estimate without continuous dependence on the in-situ network, with the caveat that periodic re-validation against wells remains advisable. Thank you; I welcome your questions.">
   <canvas class="fullcanvas" id="endCanvas"></canvas>
   <div class="hero-content end-content">
     <p class="kicker" data-reveal style="--d:.15s">Takeaways</p>
     <div class="take-list">
-      <p class="take" data-reveal style="--d:.45s"><span class="tnum">1</span><span class="take-text">In a ~93,000 km² basin, <strong>leakage correction is decisive</strong>: r = 0.17 → 0.77</span></p>
-      <p class="take" data-reveal style="--d:.85s"><span class="tnum">2</span><span class="take-text">Corrected satellite, model, and wells <strong>converge</strong>; drought loss ≈ 10.1 km³, corroborated by GPS (10.9 ± 2.8)</span></p>
+      <p class="take" data-reveal style="--d:.45s"><span class="tnum">1</span><span class="take-text">In a ~93,000 km² (~36,000 mi²) basin, <strong>leakage correction is decisive</strong>: r = 0.17 → 0.77</span></p>
+      <p class="take" data-reveal style="--d:.85s"><span class="tnum">2</span><span class="take-text">Corrected satellite, model, and wells <strong>converge</strong>; drought loss ≈ 10.1 km³ (≈ 8.2 M acre-ft), corroborated by GPS (10.9 ± 2.8 km³)</span></p>
       <p class="take" data-reveal style="--d:1.25s"><span class="tnum">3</span><span class="take-text">Groundwater follows precipitation with a lag of <strong>one to two years</strong></span></p>
       <p class="take" data-reveal style="--d:1.65s"><span class="tnum">4</span><span class="take-text">The limiting factor is the <strong>well record itself</strong>; an imputation method for multi-year gaps is a priority for future work</span></p>
       <p class="take" data-reveal style="--d:2.05s"><span class="tnum">5</span><span class="take-text">With L<sub>f</sub> calibrated, <strong>scaled GRACE can serve as an ongoing storage estimate</strong> — subject to periodic re-validation against wells</span></p>
